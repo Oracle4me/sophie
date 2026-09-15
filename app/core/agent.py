@@ -1,3 +1,4 @@
+from app.conversation.context import ContextEngine
 from app.conversation.manager import ConversationManager
 from app.core.cognitive import CognitiveCore
 from app.personality.sophie import SOPHIE_SYSTEM_PROMPT
@@ -19,6 +20,7 @@ class SophieAgent:
         llm_provider: LLMProvider,
     ) -> None:
         self.conversation = ConversationManager()
+        self.context = ContextEngine()
         self.cognitive = CognitiveCore(llm_provider)
 
     def respond(self, user_message: str) -> str:
@@ -29,12 +31,19 @@ class SophieAgent:
 
         self.conversation.add_user_message(user_message)
 
+        context = self.context.build(
+            self.conversation.get_message_models()
+        )
+
         messages = [
             {
                 "role": "system",
                 "content": SOPHIE_SYSTEM_PROMPT,
             },
-            *self.conversation.get_messages(),
+            *[
+                message.model_dump()
+                for message in context.messages
+            ],
         ]
 
         result = self.cognitive.process(messages)

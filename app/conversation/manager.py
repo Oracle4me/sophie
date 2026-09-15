@@ -31,5 +31,9 @@ class ConversationManager:
             for message in self.messages
         ]
 
+    # get message models
+    def get_message_models(self) -> list[Message]:
+        return list(self.messages)
+
     def clear(self) -> None:
         self.messages.clear()
