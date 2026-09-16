@@ -1,4 +1,4 @@
-from app.core.models import CognitiveResult, CognitiveState
+from app.core.models import CognitiveResult
 from app.providers.llm import LLMProvider
 
 
@@ -9,10 +9,9 @@ class CognitiveCore:
     Bertanggung jawab mengoordinasikan proses kognitif Sophie
     sebelum dan sesudah komunikasi dengan LLM.
 
-    Untuk v0.2, Cognitive Core masih sederhana:
-    - menerima pesan dan context
-    - menggunakan LLM untuk menghasilkan respons
-    - menghasilkan structured cognitive state
+    Cognitive Core tidak bergantung pada provider tertentu.
+    Provider bertanggung jawab mengubah respons backend
+    menjadi LLMResponse.
     """
 
     def __init__(
@@ -28,19 +27,14 @@ class CognitiveCore:
         """
         Memproses context percakapan dan menghasilkan
         respons serta cognitive state.
+
+        Cognitive state berasal dari LLMProvider,
+        bukan dibuat secara hard-code oleh Cognitive Core.
         """
 
-        response = self.llm.generate(messages)
-
-        state = CognitiveState(
-            intent="conversation",
-            topic=None,
-            confidence=1.0,
-            response_mode="normal",
-            needs_context=False,
-        )
+        llm_response = self.llm.generate(messages)
 
         return CognitiveResult(
-            response=response,
-            state=state,
+            response=llm_response.text,
+            state=llm_response.cognitive_state,
         )
