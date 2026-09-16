@@ -5,9 +5,11 @@ from app.core.autonomy import AutonomyEngine
 from app.core.cognitive import CognitiveCore
 from app.core.decision import DecisionEngine
 from app.core.runtime import AgentRuntime
+from app.core.response import ResponsePlanner
 from app.personality.sophie import (
     COGNITIVE_SYSTEM_PROMPT,
     SOPHIE_SYSTEM_PROMPT,
+    PersonalityEngine,
 )
 from app.providers.llm import LLMProvider
 
@@ -31,6 +33,8 @@ class SophieAgent:
         self.conversation = ConversationManager()
         self.context = ContextEngine()
         self.cognitive = CognitiveCore(llm_provider)
+        self.personality = PersonalityEngine()
+        self.response_planner = ResponsePlanner()
         self.runtime = AgentRuntime()
         self.attention = AttentionEngine()
         self.autonomy = AutonomyEngine()
@@ -72,6 +76,14 @@ class SophieAgent:
         ]
 
         result = self.cognitive.process(messages)
+        personality_state = self.personality.adapt_to_context(
+            result.state
+        )
+
+        response_plan = self.response_planner.plan(
+            result.state,
+            personality_state,
+        )
 
         attention = self.attention.evaluate(
             relevance=1.0,
@@ -95,6 +107,10 @@ class SophieAgent:
             current_intent=result.state.intent,
             active_topic=result.state.topic,
             response_mode=result.state.response_mode,
+
+            personality_state=personality_state,
+            response_plan=response_plan,
+
             should_respond=decision.decision != "wait",
 
             attention_score=attention.attention_score,

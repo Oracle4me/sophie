@@ -54,6 +54,13 @@ class PersonalityState(BaseModel):
     warmth: float = 0.9
     seriousness: float = 0.3
 
+class ResponsePlan(BaseModel):
+    tone: str = "natural"
+    verbosity: str = "moderate"
+    playful: bool = False
+    supportive: bool = True
+    focused: bool = False
+
 class LLMResponse(BaseModel):
     """
     Kontrak respons LLM yang digunakan oleh Sophie.
@@ -88,33 +95,24 @@ class MemoryCandidate(BaseModel):
     should_store: bool = False
 
 class AgentState(BaseModel):
-    """
-    State runtime Sophie pada satu siklus pemrosesan.
-
-    AgentState merupakan representasi keadaan Sophie saat ini,
-    bukan memory permanen dan bukan chain-of-thought.
-    """
-
     user_message: str | None = None
     conversation_active: bool = False
-
     active_topic: str | None = None
     current_intent: str = "unknown"
-
     context_available: bool = False
     memory_available: bool = False
-
     response_mode: str = "normal"
-    should_respond: bool = True
 
+    personality_state: PersonalityState | None = None
+    response_plan: ResponsePlan | None = None
+
+    should_respond: bool = True
     attention_score: float = 0.0
     attention_considered: bool = False
-
     autonomy_decision: str = "wait"
     autonomy_confidence: float = 0.0
     autonomy_reason: str = ""
     autonomy_requires_permission: bool = False
-
     decision: str = "wait"
     decision_confidence: float = 0.0
     decision_reason: str = ""
