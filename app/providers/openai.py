@@ -1,6 +1,7 @@
 from openai import OpenAI
 
 from app.core.config import settings
+from app.core.models import LLMResponse
 from app.providers.llm import LLMProvider
 
 
@@ -19,10 +20,18 @@ class OpenAIProvider(LLMProvider):
             api_key=settings.openai_api_key
         )
 
-    def generate(self, messages: list[dict[str, str]]) -> str:
-        response = self.client.responses.create(
+    def generate(self, messages: list[dict[str, str]]) -> LLMResponse:
+
+        response = self.client.responses.parse(
             model=settings.llm_model,
             input=messages,
+            text_format=LLMResponse,
         )
 
-        return response.output_text
+        if response.output_parsed is None:
+            raise ValueError(
+                "OpenAI tidak menghasilkan LLMResponse "
+                "yang dapat diparse."
+            )
+
+        return response.output_parsed

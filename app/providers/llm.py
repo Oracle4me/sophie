@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from app.core.models import LLMResponse
 
 class LLMProvider(ABC):
     """
@@ -10,7 +11,7 @@ class LLMProvider(ABC):
     """
 
     @abstractmethod
-    def generate(self, messages: list[dict[str, str]]) -> str:
+    def generate(self, messages: list[dict[str, str]]) -> LLMResponse:
         """
         Menghasilkan respons dari kumpulan pesan percakapan.
 
