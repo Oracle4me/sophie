@@ -153,20 +153,34 @@ from app.core.models import PersonalityState
 
 class PersonalityEngine:
     """
-    Mengelola keadaan perilaku Sophie.
+    Mengelola personality dasar dan dynamic state Sophie.
 
-    PersonalityState bukan emosi biologis.
-    State ini adalah parameter perilaku yang menentukan
-    bagaimana Sophie mengekspresikan respons sesuai konteks.
+    Base personality merepresentasikan karakter dasar Sophie.
+    Dynamic state merepresentasikan ekspresi perilaku Sophie
+    yang dapat berubah berdasarkan konteks.
     """
 
     def __init__(self) -> None:
-        self.state = PersonalityState()
+        self.base_state = PersonalityState()
+        self.state = self.base_state.model_copy(deep=True)
 
     def get_state(self) -> PersonalityState:
         """
-        Mengembalikan personality state Sophie saat ini.
+        Mengembalikan dynamic personality state Sophie saat ini.
         """
+        return self.state
+
+    def get_base_state(self) -> PersonalityState:
+        """
+        Mengembalikan personality dasar Sophie.
+        """
+        return self.base_state
+
+    def reset(self) -> PersonalityState:
+        """
+        Mengembalikan dynamic state ke personality dasar.
+        """
+        self.state = self.base_state.model_copy(deep=True)
         return self.state
 
     def adjust(
@@ -179,7 +193,7 @@ class PersonalityEngine:
         seriousness: float | None = None,
     ) -> PersonalityState:
         """
-        Menyesuaikan personality state Sophie.
+        Menyesuaikan dynamic personality state Sophie.
 
         Setiap nilai dibatasi pada rentang 0.0 sampai 1.0.
         Nilai None berarti parameter tersebut tidak diubah.
@@ -200,5 +214,57 @@ class PersonalityEngine:
                     field,
                     max(0.0, min(1.0, value)),
                 )
+
+        return self.state
+
+    def adapt_to_context(
+        self,
+        cognitive_state,
+    ) -> PersonalityState:
+        """
+        Menyesuaikan dynamic personality state berdasarkan
+        konteks kognitif.
+
+        Adaptasi tidak mengubah base personality.
+        """
+
+        self.reset()
+
+        intent = cognitive_state.intent.value
+
+        if intent == "technical_help":
+            self.adjust(
+                seriousness=0.75,
+                playfulness=0.35,
+                curiosity=0.85,
+            )
+
+        elif intent == "planning":
+            self.adjust(
+                seriousness=0.65,
+                playfulness=0.45,
+                curiosity=0.85,
+            )
+
+        elif intent == "question":
+            self.adjust(
+                seriousness=0.45,
+                curiosity=0.9,
+                playfulness=0.55,
+            )
+
+        elif intent == "conversation":
+            self.adjust(
+                seriousness=0.3,
+                playfulness=0.7,
+                curiosity=0.8,
+            )
+
+        elif intent == "clarification":
+            self.adjust(
+                seriousness=0.5,
+                playfulness=0.4,
+                curiosity=0.85,
+            )
 
         return self.state
