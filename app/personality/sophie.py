@@ -147,3 +147,58 @@ atau analisis tersembunyi ke dalam cognitive state.
 Cognitive state harus berupa informasi terstruktur
 yang dapat digunakan oleh Agent dan Personality layer.
 """
+
+from app.core.models import PersonalityState
+
+
+class PersonalityEngine:
+    """
+    Mengelola keadaan perilaku Sophie.
+
+    PersonalityState bukan emosi biologis.
+    State ini adalah parameter perilaku yang menentukan
+    bagaimana Sophie mengekspresikan respons sesuai konteks.
+    """
+
+    def __init__(self) -> None:
+        self.state = PersonalityState()
+
+    def get_state(self) -> PersonalityState:
+        """
+        Mengembalikan personality state Sophie saat ini.
+        """
+        return self.state
+
+    def adjust(
+        self,
+        *,
+        energy: float | None = None,
+        curiosity: float | None = None,
+        playfulness: float | None = None,
+        warmth: float | None = None,
+        seriousness: float | None = None,
+    ) -> PersonalityState:
+        """
+        Menyesuaikan personality state Sophie.
+
+        Setiap nilai dibatasi pada rentang 0.0 sampai 1.0.
+        Nilai None berarti parameter tersebut tidak diubah.
+        """
+
+        updates = {
+            "energy": energy,
+            "curiosity": curiosity,
+            "playfulness": playfulness,
+            "warmth": warmth,
+            "seriousness": seriousness,
+        }
+
+        for field, value in updates.items():
+            if value is not None:
+                setattr(
+                    self.state,
+                    field,
+                    max(0.0, min(1.0, value)),
+                )
+
+        return self.state

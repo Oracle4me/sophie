@@ -47,6 +47,13 @@ class CognitiveState(BaseModel):
     response_mode: ResponseMode = ResponseMode.NORMAL
     needs_context: bool = False
 
+class PersonalityState(BaseModel):
+    energy: float = 0.7
+    curiosity: float = 0.8
+    playfulness: float = 0.6
+    warmth: float = 0.9
+    seriousness: float = 0.3
+
 class LLMResponse(BaseModel):
     """
     Kontrak respons LLM yang digunakan oleh Sophie.
