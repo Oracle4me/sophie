@@ -6,6 +6,7 @@ from app.personality.sophie import SOPHIE_SYSTEM_PROMPT
 from app.providers.llm import LLMProvider
 from app.core.attention import AttentionEngine
 from app.core.autonomy import AutonomyEngine
+from app.core.decision import DecisionEngine
 
 
 class SophieAgent:
@@ -30,6 +31,7 @@ class SophieAgent:
         self.runtime = AgentRuntime()
         self.attention = AttentionEngine()
         self.autonomy = AutonomyEngine()
+        self.decision = DecisionEngine()
 
     def respond(self, user_message: str) -> str:
         """
@@ -76,11 +78,17 @@ class SophieAgent:
             user_focus=0.0,
         )
 
+        decision = self.decision.decide(
+            attention=attention,
+            autonomy=autonomy,
+            user_message=user_message,
+        )
+
         self.runtime.update(
             current_intent=result.state.intent,
             active_topic=result.state.topic,
             response_mode=result.state.response_mode,
-            should_respond=True,
+            should_respond=decision.decision != "wait",
 
             attention_score=attention.attention_score,
             attention_considered=attention.should_consider,
@@ -89,6 +97,11 @@ class SophieAgent:
             autonomy_confidence=autonomy.confidence,
             autonomy_reason=autonomy.reason,
             autonomy_requires_permission=autonomy.requires_permission,
+
+            decision=decision.decision,
+            decision_confidence=decision.confidence,
+            decision_reason=decision.reason,
+            decision_requires_permission=decision.requires_permission,
         )
 
         self.conversation.add_assistant_message(

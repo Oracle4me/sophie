@@ -69,6 +69,11 @@ class AgentState(BaseModel):
     autonomy_reason: str = ""
     autonomy_requires_permission: bool = False
 
+    decision: str = "wait"
+    decision_confidence: float = 0.0
+    decision_reason: str = ""
+    decision_requires_permission: bool = False
+
 class AttentionState(BaseModel):
     """
     State perhatian Sophie terhadap keadaan saat ini.
@@ -100,4 +105,17 @@ class AutonomyState(BaseModel):
     decision: str = "wait"
     confidence: float = 0.0
     reason: str = ""
+    requires_permission: bool = False
+
+class AgentDecision(BaseModel):
+    """
+    Keputusan akhir Agent Sophie untuk satu siklus.
+
+    AgentDecision hanya merepresentasikan keputusan tingkat tinggi.
+    Ia tidak menjalankan action secara langsung.
+    """
+
+    decision: str = "wait"
+    reason: str = ""
+    confidence: float = 0.0
     requires_permission: bool = False
