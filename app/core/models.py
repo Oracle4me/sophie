@@ -47,6 +47,18 @@ class CognitiveState(BaseModel):
     response_mode: ResponseMode = ResponseMode.NORMAL
     needs_context: bool = False
 
+class LLMResponse(BaseModel):
+    """
+    Kontrak respons LLM yang digunakan oleh Sophie.
+
+    Model ini sengaja tidak bergantung pada provider tertentu.
+    Provider apa pun harus dapat menerjemahkan hasilnya
+    ke dalam struktur ini.
+    """
+
+    text: str
+    cognitive_state: CognitiveState
+
 class CognitiveResult(BaseModel):
     """
     Hasil pemrosesan Cognitive Core.
