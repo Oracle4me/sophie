@@ -27,3 +27,17 @@ class CognitiveResult(BaseModel):
 
     response: str
     state: CognitiveState
+
+
+class MemoryCandidate(BaseModel):
+    """
+    Kandidat memory yang dihasilkan dari percakapan.
+
+    Candidate belum otomatis disimpan ke MemoryStore.
+    """
+
+    content: str
+    memory_type: str = "semantic"
+    importance: float = 0.5
+    should_store: bool = False
+
