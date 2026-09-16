@@ -1,3 +1,5 @@
+from enum import Enum
+
 from pydantic import BaseModel
 
 
@@ -5,19 +7,44 @@ class Message(BaseModel):
     role: str
     content: str
 
+class CognitiveIntent(str, Enum):
+    """
+    Intent dasar yang dapat dikenali Cognitive Core Sophie.
+    """
+
+    CONVERSATION = "conversation"
+    QUESTION = "question"
+    TECHNICAL_HELP = "technical_help"
+    PLANNING = "planning"
+    INSTRUCTION = "instruction"
+    CLARIFICATION = "clarification"
+    UNKNOWN = "unknown"
+
+class ResponseMode(str, Enum):
+    """
+    Mode respons yang digunakan Sophie berdasarkan
+    hasil pemahaman cognitive layer.
+    """
+
+    NORMAL = "normal"
+    TECHNICAL = "technical"
+    DISCUSSION = "discussion"
+    INSTRUCTIONAL = "instructional"
+    CLARIFICATION = "clarification"
+
 class CognitiveState(BaseModel):
     """
     Structured state hasil pemahaman Sophie terhadap
     pesan dan konteks percakapan.
 
-    Model ini sengaja hanya menyimpan state terstruktur,
+    Model ini hanya menyimpan state terstruktur,
     bukan reasoning atau chain-of-thought internal LLM.
     """
 
-    intent: str = "unknown"
+    intent: CognitiveIntent = CognitiveIntent.UNKNOWN
     topic: str | None = None
     confidence: float = 0.0
-    response_mode: str = "normal"
+    response_mode: ResponseMode = ResponseMode.NORMAL
     needs_context: bool = False
 
 class CognitiveResult(BaseModel):
