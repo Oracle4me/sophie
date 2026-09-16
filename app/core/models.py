@@ -64,6 +64,11 @@ class AgentState(BaseModel):
     attention_score: float = 0.0
     attention_considered: bool = False
 
+    autonomy_decision: str = "wait"
+    autonomy_confidence: float = 0.0
+    autonomy_reason: str = ""
+    autonomy_requires_permission: bool = False
+
 class AttentionState(BaseModel):
     """
     State perhatian Sophie terhadap keadaan saat ini.
