@@ -81,3 +81,18 @@ class AttentionState(BaseModel):
     attention_score: float = 0.0
 
     should_consider: bool = False
+
+class AutonomyState(BaseModel):
+    """
+    Keputusan autonomy Sophie.
+
+    State ini merepresentasikan keputusan tingkat tinggi
+    yang dapat diambil agent terhadap keadaan saat ini.
+
+    AutonomyState tidak menjalankan tindakan secara langsung.
+    """
+
+    decision: str = "wait"
+    confidence: float = 0.0
+    reason: str = ""
+    requires_permission: bool = False
