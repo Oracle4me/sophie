@@ -4,6 +4,7 @@ from app.core.cognitive import CognitiveCore
 from app.core.runtime import AgentRuntime
 from app.personality.sophie import SOPHIE_SYSTEM_PROMPT
 from app.providers.llm import LLMProvider
+from app.core.attention import AttentionEngine
 
 
 class SophieAgent:
@@ -26,6 +27,7 @@ class SophieAgent:
         self.context = ContextEngine()
         self.cognitive = CognitiveCore(llm_provider)
         self.runtime = AgentRuntime()
+        self.attention = AttentionEngine()
 
     def respond(self, user_message: str) -> str:
         """
@@ -60,11 +62,20 @@ class SophieAgent:
 
         result = self.cognitive.process(messages)
 
+        attention = self.attention.evaluate(
+            relevance=1.0,
+            importance=0.5,
+            urgency=0.2,
+            interruption_cost=0.0,
+        )
+
         self.runtime.update(
             current_intent=result.state.intent,
             active_topic=result.state.topic,
             response_mode=result.state.response_mode,
             should_respond=True,
+            attention_score=attention.attention_score,
+            attention_considered=attention.should_consider,
         )
 
         self.conversation.add_assistant_message(

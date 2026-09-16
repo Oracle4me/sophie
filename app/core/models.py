@@ -61,3 +61,23 @@ class AgentState(BaseModel):
     response_mode: str = "normal"
     should_respond: bool = True
 
+    attention_score: float = 0.0
+    attention_considered: bool = False
+
+class AttentionState(BaseModel):
+    """
+    State perhatian Sophie terhadap keadaan saat ini.
+
+    AttentionState bukan keputusan untuk melakukan aksi.
+    State ini hanya menggambarkan seberapa relevan sesuatu
+    untuk diperhatikan oleh Sophie.
+    """
+
+    relevance: float = 0.0
+    importance: float = 0.0
+    urgency: float = 0.0
+    interruption_cost: float = 0.0
+
+    attention_score: float = 0.0
+
+    should_consider: bool = False
