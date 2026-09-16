@@ -1,24 +1,34 @@
 from abc import ABC, abstractmethod
 
-from app.core.models import LLMResponse
+from app.core.models import CognitiveState
+
 
 class LLMProvider(ABC):
     """
     Interface dasar untuk semua LLM provider Sophie.
 
-    Agent Sophie tidak boleh bergantung langsung
-    pada provider tertentu.
+    Sophie tidak bergantung pada provider tertentu.
+    Setiap provider bertanggung jawab menerjemahkan
+    backend masing-masing ke kontrak internal Sophie.
     """
 
     @abstractmethod
-    def generate(self, messages: list[dict[str, str]]) -> LLMResponse:
+    def analyze(
+        self,
+        messages: list[dict[str, str]],
+    ) -> CognitiveState:
         """
-        Menghasilkan respons dari kumpulan pesan percakapan.
+        Menganalisis pesan dan menghasilkan cognitive state.
+        """
+        raise NotImplementedError
 
-        Args:
-            messages: Daftar pesan dengan role dan content.
-
-        Returns:
-            Respons teks dari LLM.
+    @abstractmethod
+    def generate(
+        self,
+        messages: list[dict[str, str]],
+        cognitive_state: CognitiveState,
+    ) -> str:
+        """
+        Menghasilkan teks respons berdasarkan cognitive state.
         """
         raise NotImplementedError

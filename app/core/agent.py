@@ -1,12 +1,15 @@
 from app.conversation.context import ContextEngine
 from app.conversation.manager import ConversationManager
-from app.core.cognitive import CognitiveCore
-from app.core.runtime import AgentRuntime
-from app.personality.sophie import SOPHIE_SYSTEM_PROMPT
-from app.providers.llm import LLMProvider
 from app.core.attention import AttentionEngine
 from app.core.autonomy import AutonomyEngine
+from app.core.cognitive import CognitiveCore
 from app.core.decision import DecisionEngine
+from app.core.runtime import AgentRuntime
+from app.personality.sophie import (
+    COGNITIVE_SYSTEM_PROMPT,
+    SOPHIE_SYSTEM_PROMPT,
+)
+from app.providers.llm import LLMProvider
 
 
 class SophieAgent:
@@ -57,6 +60,10 @@ class SophieAgent:
             {
                 "role": "system",
                 "content": SOPHIE_SYSTEM_PROMPT,
+            },
+            {
+                "role": "system",
+                "content": COGNITIVE_SYSTEM_PROMPT,
             },
             *[
                 message.model_dump()

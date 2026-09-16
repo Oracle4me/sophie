@@ -6,12 +6,10 @@ class CognitiveCore:
     """
     Cognitive Core Sophie.
 
-    Bertanggung jawab mengoordinasikan proses kognitif Sophie
-    sebelum dan sesudah komunikasi dengan LLM.
+    Bertanggung jawab mengoordinasikan proses kognitif Sophie:
+    analisis pesan terlebih dahulu, kemudian menghasilkan respons.
 
     Cognitive Core tidak bergantung pada provider tertentu.
-    Provider bertanggung jawab mengubah respons backend
-    menjadi LLMResponse.
     """
 
     def __init__(
@@ -25,16 +23,20 @@ class CognitiveCore:
         messages: list[dict[str, str]],
     ) -> CognitiveResult:
         """
-        Memproses context percakapan dan menghasilkan
-        respons serta cognitive state.
+        Memproses pesan melalui dua tahap:
 
-        Cognitive state berasal dari LLMProvider,
-        bukan dibuat secara hard-code oleh Cognitive Core.
+        1. Cognitive analysis
+        2. Response generation
         """
 
-        llm_response = self.llm.generate(messages)
+        cognitive_state = self.llm.analyze(messages)
+
+        response = self.llm.generate(
+            messages,
+            cognitive_state,
+        )
 
         return CognitiveResult(
-            response=llm_response.text,
-            state=llm_response.cognitive_state,
+            response=response,
+            state=cognitive_state,
         )
