@@ -41,3 +41,23 @@ class MemoryCandidate(BaseModel):
     importance: float = 0.5
     should_store: bool = False
 
+class AgentState(BaseModel):
+    """
+    State runtime Sophie pada satu siklus pemrosesan.
+
+    AgentState merupakan representasi keadaan Sophie saat ini,
+    bukan memory permanen dan bukan chain-of-thought.
+    """
+
+    user_message: str | None = None
+    conversation_active: bool = False
+
+    active_topic: str | None = None
+    current_intent: str = "unknown"
+
+    context_available: bool = False
+    memory_available: bool = False
+
+    response_mode: str = "normal"
+    should_respond: bool = True
+
