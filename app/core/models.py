@@ -32,6 +32,14 @@ class ResponseMode(str, Enum):
     INSTRUCTIONAL = "instructional"
     CLARIFICATION = "clarification"
 
+class ConversationReference(BaseModel):
+    detected: bool = False
+    reference_type: str = "none"
+    reference_text: str | None = None
+    target_message_index: int | None = None
+    target_topic: str | None = None
+    confidence: float = 0.0
+
 class CognitiveState(BaseModel):
     """
     Structured state hasil pemahaman Sophie terhadap

@@ -1,10 +1,11 @@
 from app.core.agent import SophieAgent
+from app.core.conversation_runtime import ConversationRuntime
 from app.providers.openai import OpenAIProvider
 
 
 def main() -> None:
     print("=" * 50)
-    print("              SOPHIE CORE v0.1")
+    print("              SOPHIE CORE v0.13")
     print("=" * 50)
     print("Ketik 'exit' untuk keluar.")
     print()
@@ -13,28 +14,11 @@ def main() -> None:
         llm_provider=OpenAIProvider()
     )
 
-    while True:
-        try:
-            user_input = input("You: ").strip()
+    runtime = ConversationRuntime(
+        agent=sophie
+    )
 
-            if not user_input:
-                continue
-
-            if user_input.lower() in {"exit", "quit"}:
-                print("Sophie: Sampai nanti! 👋")
-                break
-
-            response = sophie.respond(user_input)
-
-            print(f"Sophie: {response}")
-            print()
-
-        except KeyboardInterrupt:
-            print("\nSophie: Sampai nanti! 👋")
-            break
-
-        except Exception as error:
-            print(f"Sophie mengalami error: {error}")
+    runtime.run_text()
 
 
 if __name__ == "__main__":
