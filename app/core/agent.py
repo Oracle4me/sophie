@@ -129,7 +129,7 @@ class SophieAgent:
             },
             *[
                 message.model_dump()
-                for message in context.messages
+                for message in context.recent_messages
             ],
         ]
 
@@ -165,7 +165,7 @@ class SophieAgent:
             },
             *[
                 message.model_dump()
-                for message in context.messages
+                for message in context.recent_messages
             ],
         ]
 
