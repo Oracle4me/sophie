@@ -1,5 +1,7 @@
 from app.core.agent import SophieAgent
 from app.voice.input import RealtimeVoiceInput
+from app.voice.piper_tts import PiperTextToSpeech
+from app.voice.state import VoiceState
 from app.voice.stt import SpeechToText
 
 
@@ -11,18 +13,17 @@ class VoiceConversationRuntime:
 
         microphone
         -> VAD
-        -> speech segment
         -> STT
         -> SophieAgent
-        -> response text
-
-    TTS belum ditangani oleh runtime ini.
+        -> Piper TTS
+        -> speaker
     """
 
     def __init__(
         self,
         agent: SophieAgent,
         voice_input: RealtimeVoiceInput | None = None,
+        tts: PiperTextToSpeech | None = None,
     ) -> None:
         self.agent = agent
 
@@ -31,14 +32,26 @@ class VoiceConversationRuntime:
             or RealtimeVoiceInput()
         )
 
+        self.tts = (
+            tts
+            or PiperTextToSpeech()
+        )
+
         self.stt: SpeechToText | None = None
+        self.state = VoiceState.PASSIVE
+
+    def _set_state(
+        self,
+        state: VoiceState,
+    ) -> None:
+        self.state = state
 
     def _get_stt(self) -> SpeechToText:
         """
-        Lazy-load STT.
+        Lazy-load Whisper.
 
-        Whisper tidak dimuat selama Sophie
-        belum menerima speech.
+        STT baru dimuat ketika Sophie benar-benar
+        menerima suara.
         """
 
         if self.stt is None:
@@ -50,16 +63,25 @@ class VoiceConversationRuntime:
 
     def process_once(self) -> str:
         """
-        Menjalankan satu siklus percakapan suara.
+        Memproses satu siklus percakapan suara.
         """
 
-        print()
-        print("Sophie siap mendengar...")
+        self._set_state(
+            VoiceState.LISTENING
+        )
 
         audio = self.voice_input.listen()
 
         if len(audio) == 0:
+            self._set_state(
+                VoiceState.PASSIVE
+            )
+
             return ""
+
+        self._set_state(
+            VoiceState.THINKING
+        )
 
         print("Suara selesai direkam.")
 
@@ -70,7 +92,14 @@ class VoiceConversationRuntime:
         text = stt.transcribe(audio)
 
         if not text:
-            print("Sophie tidak menangkap teks.")
+            print(
+                "Sophie tidak menangkap teks."
+            )
+
+            self._set_state(
+                VoiceState.PASSIVE
+            )
+
             return ""
 
         print(f"You: {text}")
@@ -79,16 +108,26 @@ class VoiceConversationRuntime:
 
         print(f"Sophie: {response}")
 
+        self._set_state(
+            VoiceState.SPEAKING
+        )
+
+        self.tts.speak(response)
+
+        self._set_state(
+            VoiceState.PASSIVE
+        )
+
         return response
 
     def run(self) -> None:
         """
-        Menjalankan percakapan suara secara terus-menerus.
+        Menjalankan percakapan suara terus-menerus.
         """
 
         print()
         print("========================================")
-        print("       SOPHIE VOICE CONVERSATION")
+        print("       SOPHIE FULL VOICE MODE")
         print("========================================")
         print("Tekan Ctrl+C untuk keluar.")
         print()
@@ -98,5 +137,9 @@ class VoiceConversationRuntime:
                 self.process_once()
 
         except KeyboardInterrupt:
+            self._set_state(
+                VoiceState.PASSIVE
+            )
+
             print()
             print("Sophie: Sampai nanti! 👋")
