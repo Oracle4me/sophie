@@ -53,7 +53,8 @@ class SophieAgent:
         self.conversation.add_user_message(user_message)
 
         context = self.context.build(
-            self.conversation.get_message_models()
+            self.conversation.get_message_models(),
+            previous_topic=self.runtime.state.active_topic,
         )
 
         self.runtime.update(
@@ -126,6 +127,17 @@ class SophieAgent:
             {
                 "role": "system",
                 "content": COGNITIVE_SYSTEM_PROMPT,
+            },
+            {
+                "role": "system",
+                "content": (
+                    "Current conversation context:\n"
+                    f"- previous_topic: {context.previous_topic}\n"
+                    f"- latest_user_message: {context.latest_user_message}\n"
+                    f"- latest_assistant_message: "
+                    f"{context.latest_assistant_message}\n"
+                    f"- conversation_active: {context.conversation_active}"
+                ),
             },
             *[
                 message.model_dump()

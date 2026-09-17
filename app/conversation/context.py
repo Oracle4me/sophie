@@ -18,6 +18,7 @@ class ConversationContext(BaseModel):
 
     latest_user_message: str | None = None
     latest_assistant_message: str | None = None
+    previous_topic: str | None = None
 
     message_count: int = 0
     user_turn_count: int = 0
@@ -52,6 +53,7 @@ class ContextEngine:
     def build(
         self,
         messages: list[Message],
+        previous_topic: str | None = None,
     ) -> ConversationContext:
         latest_user_message = None
         latest_assistant_message = None
@@ -87,6 +89,7 @@ class ContextEngine:
             recent_messages=recent_messages,
             latest_user_message=latest_user_message,
             latest_assistant_message=latest_assistant_message,
+            previous_topic=previous_topic,
             message_count=len(messages),
             user_turn_count=user_turn_count,
             assistant_turn_count=assistant_turn_count,
