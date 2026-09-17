@@ -79,3 +79,23 @@ class ResponsePlanner:
             plan.supportive = True
 
         return plan
+
+    def build_generation_context(
+        self,
+        response_plan: ResponsePlan,
+    ) -> str:
+        """
+        Mengubah ResponsePlan menjadi instruksi ringkas
+        untuk response generation.
+
+        Method ini tidak menghasilkan respons.
+        """
+
+        return (
+            "Response plan Sophie:\n"
+            f"- tone: {response_plan.tone}\n"
+            f"- verbosity: {response_plan.verbosity}\n"
+            f"- playful: {response_plan.playful}\n"
+            f"- supportive: {response_plan.supportive}\n"
+            f"- focused: {response_plan.focused}"
+        )

@@ -60,7 +60,7 @@ class SophieAgent:
             context_available=context.message_count > 0,
         )
 
-        messages = [
+        analysis_messages = [
             {
                 "role": "system",
                 "content": SOPHIE_SYSTEM_PROMPT,
@@ -75,14 +75,34 @@ class SophieAgent:
             ],
         ]
 
-        result = self.cognitive.process(messages)
+        cognitive_state = self.cognitive.analyze(
+            analysis_messages
+        )
+
+        generation_messages = [
+            {
+                "role": "system",
+                "content": SOPHIE_SYSTEM_PROMPT,
+            },
+            *[
+                message.model_dump()
+                for message in context.messages
+            ],
+        ]
+
         personality_state = self.personality.adapt_to_context(
-            result.state
+            cognitive_state
         )
 
         response_plan = self.response_planner.plan(
-            result.state,
+            cognitive_state,
             personality_state,
+        )
+
+        response = self.cognitive.generate(
+            generation_messages,
+            cognitive_state,
+            response_plan,
         )
 
         attention = self.attention.evaluate(
@@ -104,9 +124,9 @@ class SophieAgent:
         )
 
         self.runtime.update(
-            current_intent=result.state.intent,
-            active_topic=result.state.topic,
-            response_mode=result.state.response_mode,
+            current_intent=cognitive_state.intent,
+            active_topic=cognitive_state.topic,
+            response_mode=cognitive_state.response_mode,
 
             personality_state=personality_state,
             response_plan=response_plan,
@@ -128,7 +148,7 @@ class SophieAgent:
         )
 
         self.conversation.add_assistant_message(
-            result.response
+            response
         )
 
-        return result.response
+        return response
