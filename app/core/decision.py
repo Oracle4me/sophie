@@ -30,14 +30,6 @@ class DecisionEngine:
                 requires_permission=False,
             )
 
-        if autonomy.decision == "offer_help":
-            return AgentDecision(
-                decision="offer_help",
-                reason=autonomy.reason,
-                confidence=autonomy.confidence,
-                requires_permission=autonomy.requires_permission,
-            )
-
         if autonomy.decision == "wait":
             return AgentDecision(
                 decision="respond",
