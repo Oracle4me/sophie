@@ -1,4 +1,5 @@
-import sounddevice as sd
+import gc
+
 from faster_whisper import WhisperModel
 
 
@@ -6,7 +7,7 @@ class SpeechToText:
     """
     Speech-to-Text engine Sophie.
 
-    Bertanggung jawab mengubah suara microphone
+    Bertanggung jawab mengubah audio microphone
     menjadi teks.
 
     Engine ini tidak mengetahui SophieAgent.
@@ -19,7 +20,7 @@ class SpeechToText:
     ) -> None:
         self.sample_rate = sample_rate
 
-        self.model = WhisperModel(
+        self.model: WhisperModel | None = WhisperModel(
             model_size,
             device="cpu",
             compute_type="int8",
@@ -29,6 +30,20 @@ class SpeechToText:
         self,
         duration: float = 5.0,
     ):
+        """
+        Merekam audio dari microphone.
+
+        Method ini dipertahankan untuk kompatibilitas
+        dengan test STT lama.
+        """
+
+        if self.model is None:
+            raise RuntimeError(
+                "STT model sudah dilepas dari memory."
+            )
+
+        import sounddevice as sd
+
         frames = int(
             duration * self.sample_rate
         )
@@ -44,7 +59,19 @@ class SpeechToText:
 
         return audio.flatten()
 
-    def transcribe(self, audio) -> str:
+    def transcribe(
+        self,
+        audio,
+    ) -> str:
+        """
+        Mengubah audio menjadi teks.
+        """
+
+        if self.model is None:
+            raise RuntimeError(
+                "STT model sudah dilepas dari memory."
+            )
+
         segments, _ = self.model.transcribe(
             audio,
             language="id",
@@ -62,5 +89,28 @@ class SpeechToText:
         self,
         duration: float = 5.0,
     ) -> str:
-        audio = self.record(duration)
+        """
+        Merekam lalu melakukan transkripsi.
+        """
+
+        audio = self.record(
+            duration=duration
+        )
+
         return self.transcribe(audio)
+
+    def release(self) -> None:
+        """
+        Melepaskan model Whisper dari memory.
+        """
+
+        if self.model is None:
+            return
+
+        self.model = None
+
+        gc.collect()
+
+        print(
+            "STT model dilepas dari memory."
+        )

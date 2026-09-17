@@ -1,3 +1,4 @@
+import gc
 import wave
 from pathlib import Path
 
@@ -10,9 +11,8 @@ class PiperTextToSpeech:
     """
     Local Text-to-Speech engine Sophie menggunakan Piper.
 
-    Model dimuat secara lazy:
-    Piper baru dimuat ketika Sophie benar-benar
-    membutuhkan suara.
+    Model dimuat secara lazy dan dapat dilepas
+    dari memory ketika Sophie idle.
     """
 
     def __init__(
@@ -32,17 +32,21 @@ class PiperTextToSpeech:
         if self._voice is None:
             if not self.model_path.exists():
                 raise FileNotFoundError(
-                    f"Model Piper tidak ditemukan: "
+                    "Model Piper tidak ditemukan: "
                     f"{self.model_path}"
                 )
 
-            print("Memuat voice model Piper...")
+            print(
+                "Memuat voice model Piper..."
+            )
 
             self._voice = PiperVoice.load(
                 str(self.model_path)
             )
 
-            print("Voice model Piper siap.")
+            print(
+                "Voice model Piper siap."
+            )
 
         return self._voice
 
@@ -79,7 +83,10 @@ class PiperTextToSpeech:
 
         return output_path
 
-    def speak(self, text: str) -> None:
+    def speak(
+        self,
+        text: str,
+    ) -> None:
         """
         Menghasilkan audio lalu memutarnya.
         """
@@ -93,7 +100,9 @@ class PiperTextToSpeech:
             output_path,
         )
 
-        self._play_wav(output_path)
+        self._play_wav(
+            output_path
+        )
 
     def _play_wav(
         self,
@@ -112,17 +121,21 @@ class PiperTextToSpeech:
             sample_rate = wav_file.getframerate()
             frame_count = wav_file.getnframes()
 
-            audio_data = wav_file.readframes(
-                frame_count
+            audio_data = (
+                wav_file.readframes(
+                    frame_count
+                )
             )
 
         if sample_width == 2:
             dtype = np.int16
+
         elif sample_width == 4:
             dtype = np.int32
+
         else:
             raise ValueError(
-                f"Sample width tidak didukung: "
+                "Sample width tidak didukung: "
                 f"{sample_width}"
             )
 
@@ -143,3 +156,19 @@ class PiperTextToSpeech:
         )
 
         sd.wait()
+
+    def release(self) -> None:
+        """
+        Melepaskan voice model Piper dari memory.
+        """
+
+        if self._voice is None:
+            return
+
+        self._voice = None
+
+        gc.collect()
+
+        print(
+            "Piper voice model dilepas dari memory."
+        )
